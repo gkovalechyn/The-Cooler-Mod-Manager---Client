@@ -1,0 +1,7 @@
+appId: net.gkovalechyn.tcmm-client
+productName: The Cooler Mod Manager
+copyright: Copyright ©2020 gkovalechyn
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
