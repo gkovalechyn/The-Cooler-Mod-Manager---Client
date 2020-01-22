@@ -1,4 +1,4 @@
-# tcmm-client
+# The Cooler Mod Manager - Client
 
 ## Project setup
 ```
