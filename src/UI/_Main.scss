@@ -56,3 +56,37 @@ $sizes: 0.25rem, 0.5rem, 1rem, 2rem, 3rem;
     padding-right: nth($sizes, $i);
   }
 }
+
+.spin {
+  animation-name: spin;
+  animation-timing-function: linear;
+  animation-duration: 5s;
+  animation-iteration-count: infinite;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+}
+
+.spinner::after {
+  content: " ";
+  display: block;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border: 3px solid black;
+  border-color: black transparent black transparent;
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotateZ(0deg);
+  }
+
+  100% {
+    transform: rotateZ(360deg);
+  }
+}

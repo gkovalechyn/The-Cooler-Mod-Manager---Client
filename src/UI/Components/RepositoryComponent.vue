@@ -1,15 +1,15 @@
 <template>
   <div class="repository">
-    <div class="repository-image">
-      <div class="has-background-danger width-100" style="height: 100%;"></div>
-    </div>
-    <div class="padding-left-1">
+    <i class="repository-image has-background-danger"></i>
+    <div class="repository-details">
       <div class="repository-title">
-        Repository name
+        {{ repository.name }}
       </div>
       <div class="repository-url">
-        gkovalechyn.net/mods/repoas
+        {{ repository.remoteUrls[0] }}
       </div>
+
+      <RepositoryStateComponent :state="repository.state"></RepositoryStateComponent>
     </div>
   </div>
 </template>
@@ -17,9 +17,20 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
+import { Prop } from "vue-property-decorator";
+import { LocalRepository } from "../../Core/LocalRepository";
+import { RepositoryState } from "../../Core/RepositoryState";
+import RepositoryStateComponent from "./RepositoryStateComponent.vue";
 
-@Component
-export default class RepositoryComponent extends Vue {}
+@Component({
+  components: {
+    RepositoryStateComponent
+  }
+})
+export default class RepositoryComponent extends Vue {
+  @Prop()
+  private repository!: LocalRepository;
+}
 </script>
 
 <style lang="scss">
@@ -36,9 +47,18 @@ export default class RepositoryComponent extends Vue {}
 }
 
 .repository-image {
-  height: 64px;
-  width: 64px;
+  min-height: 64px;
+  max-height: 64px;
+  min-width: 64px;
+  max-width: 64px;
 }
+
+.repository-details {
+  width: 100%;
+  overflow: hidden;
+  padding-left: 0.5rem;
+}
+
 .repository-title {
   text-align: left;
   font-weight: bold;
@@ -47,5 +67,6 @@ export default class RepositoryComponent extends Vue {}
 .repository-url {
   text-align: left;
   font-size: 0.7rem;
+  white-space: nowrap;
 }
 </style>
