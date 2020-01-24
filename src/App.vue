@@ -6,7 +6,6 @@
 
 <style lang="scss">
 @import "~bulma/css/bulma.css";
-@import "~material-design-icons/iconfont/material-icons.css";
 @import "./UI/Main";
 
 #app {
