@@ -16,12 +16,11 @@ function createWindow() {
   win = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: true,
     webPreferences: {
       nodeIntegration: true
     }
   });
-
-  win.removeMenu();
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -29,6 +28,7 @@ function createWindow() {
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol("app");
+    win.removeMenu();
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
   }

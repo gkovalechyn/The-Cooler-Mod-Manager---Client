@@ -36,6 +36,16 @@ $sizes: 0.25rem, 0.5rem, 1rem, 2rem, 3rem;
     margin-right: nth($sizes, $i);
   }
 
+  .margin-x-#{$i} {
+    margin-left: nth($sizes, $i);
+    margin-right: nth($sizes, $i);
+  }
+
+  .margin-y-#{$i} {
+    margin-top: nth($sizes, $i);
+    margin-bottom: nth($sizes, $i);
+  }
+
   .padding-#{$i} {
     padding: nth($sizes, $i);
   }
@@ -55,4 +65,22 @@ $sizes: 0.25rem, 0.5rem, 1rem, 2rem, 3rem;
   .padding-right-#{$i} {
     padding-right: nth($sizes, $i);
   }
+
+  .padding-x-#{$i} {
+    padding-left: nth($sizes, $i);
+    padding-right: nth($sizes, $i);
+  }
+
+  .padding-y-#{$i} {
+    padding-top: nth($sizes, $i);
+    padding-bottom: nth($sizes, $i);
+  }
+}
+
+.no-wrap {
+  white-space: nowrap;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
 }

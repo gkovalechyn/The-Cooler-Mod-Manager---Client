@@ -1,14 +1,15 @@
 <template>
-  <div class="repository">
-    <i class="repository-image has-background-danger"></i>
+  <div class="repository" @click="onClicked">
+    <i class="repository-image has-background-danger">Icon</i>
     <div class="repository-details">
       <div class="repository-title">
         {{ repository.name }}
       </div>
+      <!--
       <div class="repository-url">
         {{ repository.remoteUrls[0] }}
       </div>
-
+      -->
       <RepositoryStateComponent :state="repository.state"></RepositoryStateComponent>
     </div>
   </div>
@@ -30,6 +31,10 @@ import RepositoryStateComponent from "./RepositoryStateComponent.vue";
 export default class RepositoryComponent extends Vue {
   @Prop()
   private repository!: LocalRepository;
+
+  private onClicked(event: MouseEvent) {
+    this.$emit("click", event);
+  }
 }
 </script>
 
@@ -57,6 +62,10 @@ export default class RepositoryComponent extends Vue {
   width: 100%;
   overflow: hidden;
   padding-left: 0.5rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .repository-title {

@@ -1,16 +1,25 @@
 <template>
   <div>
-    <AppHeader></AppHeader>
     <div class="display-flex width-100">
       <div class="width-40">
         <RepositoryComponent
           v-for="(repository, index) in repositories"
           :key="index"
           :repository="repository"
+          @click="selectedRepository = repository"
         ></RepositoryComponent>
+        <button class="button has-background-black has-text-white width-100">
+          <div class="padding-x-1">
+            <span class="fas fa-plus"></span>
+          </div>
+          Add repository
+        </button>
       </div>
       <div class="width-60">
-        Right side
+        <RepositoryDetailsComponent
+          v-if="selectedRepository"
+          :repository="selectedRepository"
+        ></RepositoryDetailsComponent>
       </div>
     </div>
   </div>
@@ -27,11 +36,13 @@ import { promisify } from "util";
 import { RepositoryDetails } from "../../Core/RepositoryDetails";
 import { LocalRepository } from "../../Core/LocalRepository";
 import { RepositoryState } from "../../Core/RepositoryState";
+import RepositoryDetailsComponent from "../Components/RepositoryDetailsComponent.vue";
 
 @Component({
   components: {
     AppHeader,
-    RepositoryComponent
+    RepositoryComponent,
+    RepositoryDetailsComponent
   }
 })
 export default class RepositoriesView extends Vue {
@@ -39,10 +50,30 @@ export default class RepositoriesView extends Vue {
     {
       name: "Test repository",
       state: RepositoryState.READY,
-      remoteUrls: ["http://gkovalechyn.net/repositories/test asdasjd;ladjpoawjdpoajdpowajd"],
-      items: {}
+      remoteUrls: [
+        "http://gkovalechyn.net/repositories/test asdasjd;ladjpoawjdpoajdpowajd",
+        "This is a secondary url that should be pretty long to test stuff",
+        "And this is a tertiary url that is pretty big too"
+      ],
+      items: {},
+      enabledMods: [
+        "@Mod 1",
+        "@Mod 2",
+        "@Mod 3",
+        "@Mod 1",
+        "@Mod 2",
+        "@Mod 3",
+        "@Mod 1",
+        "@Mod 2",
+        "@Mod 3",
+        "@Mod 1",
+        "@Mod 2",
+        "@Mod 3"
+      ]
     }
   ];
+
+  private selectedRepository: LocalRepository | null = null;
 
   public created() {
     this.loadRepositories();
