@@ -13,7 +13,6 @@ export class RemoteRepository {
     remote.name = plainObject.name;
     remote.state = plainObject.state;
     remote.version = plainObject.version;
-    remote.version = plainObject.version;
 
     if (plainObject.items) {
       remote.items = plainObject.items;

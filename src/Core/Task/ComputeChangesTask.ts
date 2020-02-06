@@ -12,19 +12,20 @@ export class ComputeChangesTask extends Task<Change[]> {
     super();
   }
 
-  public async run(notify: NotifyCallback) {
+  public async run() {
     const remoteItems = this.remote.items;
 
     // Find changed or missing items
     for (const relativePath of Object.keys(remoteItems)) {
+      const remoteItem = this.remote.items[relativePath];
+
       if (!this.local.items[relativePath]) {
-        this.changes.push(new Change(relativePath, ItemState.PENDING_CREATION));
+        this.changes.push(new Change(relativePath, ItemState.PENDING_CREATION, remoteItem.size));
       } else {
-        const remoteItem = this.remote.items[relativePath];
         const localItem = this.local.items[relativePath];
 
         if (localItem.hash != remoteItem.hash) {
-          this.changes.push(new Change(relativePath, ItemState.PENDING_UPDATE));
+          this.changes.push(new Change(relativePath, ItemState.PENDING_UPDATE, remoteItem.size));
         }
       }
     }
@@ -39,7 +40,7 @@ export class ComputeChangesTask extends Task<Change[]> {
 
     for (const relativePath of Object.keys(localItems)) {
       if (!this.remote.items[relativePath]) {
-        this.changes.push(new Change(relativePath, ItemState.PENDING_DELETE));
+        this.changes.push(new Change(relativePath, ItemState.PENDING_DELETE, localItems[relativePath].size));
       }
     }
   }

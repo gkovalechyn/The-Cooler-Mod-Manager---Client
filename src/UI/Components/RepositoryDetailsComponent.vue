@@ -3,8 +3,15 @@
     <i class="repository-banner has-background-danger">Banner</i>
     <div class="has-text-weight-bold">{{ repository.name }}</div>
     <div class="buttons-container">
-      <button class="button has-background-success flex-grow-1">Launch</button>
-      <button class="button has-background-info flex-grow-1">Join</button>
+      <button
+        class="button is-danger flex-grow-3"
+        v-if="repository.state == 'updates-pending'"
+        @click="onDownloadUpdatesClicked"
+      >
+        Download updates
+      </button>
+      <button class="button is-success flex-grow-1">Launch</button>
+      <button class="button is-info flex-grow-1">Join</button>
     </div>
 
     <hr class="margin-top-1 margin-bottom-1" />
@@ -64,6 +71,10 @@ export default class RepositoryDetailsComponent extends Vue {
     } catch (error) {
       this.onMessage(error);
     }
+  }
+
+  private onDownloadUpdatesClicked() {
+    this.$emit("updateDownloadRequested");
   }
 
   private onMessage(message: any) {
