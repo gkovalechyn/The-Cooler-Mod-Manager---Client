@@ -8,7 +8,7 @@
           :repository="repository"
           @click="selectedRepository = repository"
         ></RepositoryComponent>
-        <button class="button has-background-black has-text-white width-100">
+        <button class="button has-background-black has-text-white width-100" @click="onAddRepositoryClicked">
           <div class="padding-x-1">
             <span class="fas fa-plus"></span>
           </div>
@@ -22,6 +22,7 @@
         ></RepositoryDetailsComponent>
       </div>
     </div>
+    <AddRepositoryModal ref="addRepositoryModal"></AddRepositoryModal>
   </div>
 </template>
 
@@ -37,12 +38,14 @@ import { RepositoryDetails } from "../../Core/RepositoryDetails";
 import { LocalRepository } from "../../Core/LocalRepository";
 import { RepositoryState } from "../../Core/RepositoryState";
 import RepositoryDetailsComponent from "../Components/RepositoryDetailsComponent.vue";
+import AddRepositoryModal from "../Components/AddRepositoryModal.vue";
 
 @Component({
   components: {
     AppHeader,
     RepositoryComponent,
-    RepositoryDetailsComponent
+    RepositoryDetailsComponent,
+    AddRepositoryModal
   }
 })
 export default class RepositoriesView extends Vue {
@@ -77,6 +80,14 @@ export default class RepositoriesView extends Vue {
 
   public created() {
     this.loadRepositories();
+  }
+
+  private get addRepositoryModal() {
+    return this.$refs.addRepositoryModal as AddRepositoryModal;
+  }
+
+  private onAddRepositoryClicked() {
+    this.addRepositoryModal.open();
   }
 
   private async loadRepositories() {
