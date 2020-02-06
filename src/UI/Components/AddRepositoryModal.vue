@@ -131,10 +131,23 @@ export default class AddRepositoryModal extends Vue {
       });
   }
 
+  private cleanup() {
+    this.repositoryUrl = "";
+    this.destinationFolder = "";
+    this.repositorySize = "";
+    this.remoteRepository = null;
+    this.isLoading = false;
+    if (this.debounceTimeout) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = null;
+    }
+  }
+
   public open() {
     this.modalContainer.classList.add("is-active");
   }
   public close() {
+    this.cleanup();
     this.modalContainer.classList.remove("is-active");
   }
 }
