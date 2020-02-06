@@ -51,6 +51,7 @@ import { Watch } from "vue-property-decorator";
 import { RemoteRepository } from "../../Core/RemoteRepository";
 import { RepositoryUtils } from "../../Core/RepositoryUtils";
 import RepositoryManager from "../../Core/RepositoryManager";
+import { plainToClass } from "class-transformer";
 
 @Component
 export default class AddRepositoryModal extends Vue {
@@ -82,7 +83,11 @@ export default class AddRepositoryModal extends Vue {
 
   private addRepository() {
     if (this.remoteRepository) {
-      RepositoryManager.createFromRemoteRepository(this.remoteRepository, [this.repositoryUrl], this.destinationFolder);
+      RepositoryManager.createFromRemoteRepository(
+        this.remoteRepository.name,
+        [this.repositoryUrl],
+        this.destinationFolder
+      );
       this.$emit("repositoryAdded");
     }
   }
@@ -102,7 +107,8 @@ export default class AddRepositoryModal extends Vue {
     this.axios
       .get(this.repositoryUrl)
       .then(response => {
-        this.remoteRepository = response.data as RemoteRepository;
+        this.remoteRepository = RemoteRepository.fromPlain(response.data);
+
         RepositoryUtils.calculateRepositorySize(this.remoteRepository).then(size => {
           this.repositorySize = RepositoryUtils.sizeToHumanReadableString(size);
         });

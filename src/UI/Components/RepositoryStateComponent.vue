@@ -10,6 +10,16 @@
       Scanning
     </div>
 
+    <div v-if="state === 'verifying'" class="has-background-info has-text-white w-100 h-100">
+      <span class="fas fa-cog fa-spin"></span>
+      Verifying
+    </div>
+
+    <div v-if="state === 'updates-pending'" class="has-background-danger has-text-white w-100 h-100">
+      <span class="fas fa-exclamation"></span>
+      Updates pending
+    </div>
+
     <div v-if="state === 'ready'" class="has-background-success has-text-white w-100 h-100">
       <span class="fas fa-check"></span>
       Ready

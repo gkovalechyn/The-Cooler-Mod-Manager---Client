@@ -1,32 +1,34 @@
 import { LocalRepository } from "./LocalRepository";
-import { readFile, existsSync, writeFile } from "fs";
+import { readFile, existsSync, writeFile, mkdirSync } from "fs";
 import { promisify } from "util";
 import { RepositoryDetails } from "./RepositoryDetails";
 import { remote } from "electron";
-import { RemoteRepository } from "./RemoteRepository";
-import { serialize, deserialize } from "class-transformer";
+import { serialize } from "class-transformer";
 import { RepositoryState } from "./RepositoryState";
+import { VerifyRepositoryTask } from "./Task/VerifyRepositoryTask";
+import { ScanRepositoryTask } from "./Task/ScanRepositoryTask";
 
 class RepositoryManager {
   private localRepositories: LocalRepository[] = [];
 
   public constructor() {
-    this.loadRepositories();
+    this.loadRepositories().then(this.verifyRepositories.bind(this));
   }
 
   public get LocalRepositories() {
     return this.localRepositories;
   }
 
-  public createFromRemoteRepository(remote: RemoteRepository, urls: string[], folder: string) {
+  public createFromRemoteRepository(name: string, urls: string[], folder: string) {
     const local = new LocalRepository();
-    local.name = remote.name;
+    local.name = name;
     local.state = RepositoryState.PENDING_SCAN;
     local.path = folder;
-    local.items = remote.items;
     local.remoteUrls = urls;
 
     this.localRepositories.push(local);
+
+    mkdirSync(local.filesPath, { recursive: true });
 
     this.saveRepositories();
   }
@@ -39,6 +41,8 @@ class RepositoryManager {
     for (const repository of this.localRepositories) {
       details.push({
         name: repository.name,
+        version: repository.version,
+        state: repository.state,
         path: repository.path
       });
 
@@ -58,11 +62,11 @@ class RepositoryManager {
       const repositoryList = JSON.parse(await readFileAsync(path, { encoding: "utf8" })) as RepositoryDetails[];
 
       for (const detail of repositoryList) {
-        this.loadSingleRepository(detail).then(repository => {
-          if (repository) {
-            this.localRepositories.push(repository);
-          }
-        });
+        const repository = await this.loadSingleRepository(detail);
+
+        if (repository) {
+          this.localRepositories.push(repository);
+        }
       }
     }
   }
@@ -72,10 +76,37 @@ class RepositoryManager {
     const readFileAsync = promisify(readFile);
 
     if (existsSync(filePath)) {
-      return deserialize(LocalRepository, await readFileAsync(filePath, { encoding: "utf8" }));
+      const jsonBlob = JSON.parse(await readFileAsync(filePath, { encoding: "utf8" }));
+      return LocalRepository.fromPlain(jsonBlob);
     }
 
     return null;
+  }
+
+  private async verifyRepositories() {
+    for (const repository of this.localRepositories) {
+      switch (repository.state) {
+        case RepositoryState.READY:
+          // If the repository is ready, we'll need to check with the server
+          // to make sure the server repository hasn't changed
+          new VerifyRepositoryTask(repository).run(() => {});
+          break;
+
+        case RepositoryState.PENDING_SCAN:
+          new ScanRepositoryTask(repository)
+            .run(() => {})
+            .then(() => {
+              new VerifyRepositoryTask(repository).run(() => {});
+            });
+          break;
+        case RepositoryState.SCANNING:
+          break;
+        case RepositoryState.UPDATES_PENDING:
+          break;
+        default:
+          repository.state = RepositoryState.PENDING_SCAN;
+      }
+    }
   }
 }
 
