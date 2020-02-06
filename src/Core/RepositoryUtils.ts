@@ -26,9 +26,13 @@ export class RepositoryUtils {
   }
 
   public static sizeToHumanReadableString(size: number) {
-    // https://stackoverflow.com/questions/4498866/actual-numbers-to-the-human-readable-values
-    var sizes = ["bytes", "kB", "MB", "GB", "TB", "PB"];
-    var e = Math.floor(Math.log(size) / Math.log(1024));
-    return (size / Math.pow(1024, e)).toFixed(2) + " " + sizes[e];
+    let i = 0;
+    const units = [" bytes", " kB", " MB", " GB", " TB", "PB", "EB", "ZB", "YB"];
+    while (size > 1024) {
+      size = size / 1024;
+      i++;
+    }
+
+    return size.toFixed(2) + units[i];
   }
 }
