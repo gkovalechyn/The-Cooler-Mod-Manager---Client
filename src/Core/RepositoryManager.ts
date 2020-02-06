@@ -41,8 +41,6 @@ class RepositoryManager {
     for (const repository of this.localRepositories) {
       details.push({
         name: repository.name,
-        version: repository.version,
-        state: repository.state,
         path: repository.path
       });
 
