@@ -22,7 +22,7 @@
         ></RepositoryDetailsComponent>
       </div>
     </div>
-    <AddRepositoryModal ref="addRepositoryModal"></AddRepositoryModal>
+    <AddRepositoryModal ref="addRepositoryModal" @repositoryAdded="onRepositoryadded"></AddRepositoryModal>
   </div>
 </template>
 
@@ -39,6 +39,7 @@ import { LocalRepository } from "../../Core/LocalRepository";
 import { RepositoryState } from "../../Core/RepositoryState";
 import RepositoryDetailsComponent from "../Components/RepositoryDetailsComponent.vue";
 import AddRepositoryModal from "../Components/AddRepositoryModal.vue";
+import RepositoryManager from "@/Core/RepositoryManager";
 
 @Component({
   components: {
@@ -49,37 +50,20 @@ import AddRepositoryModal from "../Components/AddRepositoryModal.vue";
   }
 })
 export default class RepositoriesView extends Vue {
-  private repositories: LocalRepository[] = [
-    {
-      name: "Test repository",
-      state: RepositoryState.READY,
-      remoteUrls: [
-        "http://gkovalechyn.net/repositories/test asdasjd;ladjpoawjdpoajdpowajd",
-        "This is a secondary url that should be pretty long to test stuff",
-        "And this is a tertiary url that is pretty big too"
-      ],
-      items: {},
-      enabledMods: [
-        "@Mod 1",
-        "@Mod 2",
-        "@Mod 3",
-        "@Mod 1",
-        "@Mod 2",
-        "@Mod 3",
-        "@Mod 1",
-        "@Mod 2",
-        "@Mod 3",
-        "@Mod 1",
-        "@Mod 2",
-        "@Mod 3"
-      ]
-    }
-  ];
-
+  private repositories: LocalRepository[] = [];
   private selectedRepository: LocalRepository | null = null;
 
   public created() {
-    this.loadRepositories();
+    this.updateRepositories();
+  }
+
+  private onRepositoryadded() {
+    this.addRepositoryModal.close();
+    this.updateRepositories();
+  }
+
+  private updateRepositories() {
+    this.repositories = RepositoryManager.LocalRepositories;
   }
 
   private get addRepositoryModal() {
@@ -88,34 +72,6 @@ export default class RepositoriesView extends Vue {
 
   private onAddRepositoryClicked() {
     this.addRepositoryModal.open();
-  }
-
-  private async loadRepositories() {
-    const path = remote.app.getAppPath() + "/repositories.json";
-    const readFileAsync = promisify(readFile);
-
-    if (existsSync(path)) {
-      const repositoryList = JSON.parse(await readFileAsync(path, { encoding: "utf8" })) as RepositoryDetails[];
-
-      for (const detail of repositoryList) {
-        this.loadSingleRepository(detail).then(repository => {
-          if (repository) {
-            this.repositories.push(repository);
-          }
-        });
-      }
-    }
-  }
-
-  private async loadSingleRepository(details: RepositoryDetails) {
-    const filePath = details.path + "/repository.json";
-    const readFileAsync = promisify(readFile);
-
-    if (existsSync(filePath)) {
-      return JSON.parse(await readFileAsync(filePath, { encoding: "utf8" })) as LocalRepository;
-    }
-
-    return null;
   }
 }
 </script>

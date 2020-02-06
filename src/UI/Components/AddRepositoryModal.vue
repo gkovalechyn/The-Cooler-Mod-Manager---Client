@@ -1,5 +1,5 @@
 <template>
-  <div class="modal is-active" ref="modalContainer">
+  <div class="modal" ref="modalContainer">
     <div class="modal-background"></div>
     <div class="modal-content box">
       <div class="control margin-bottom-2" :class="controlClasses">
@@ -16,12 +16,27 @@
         </div>
       </div>
 
-      <div v-if="foundRepository">
-        <div>Repository size: {{ repositorySize }}</div>
+      <div class="has-text-left">
+        <div class="has-text-weight-bold has-text-centered">Repository details</div>
+
+        <div class="columns">
+          <div class="column padding-bottom-0">
+            <span class="has-text-weight-bold">Repository name:</span> {{ remoteRepositoryName }}
+          </div>
+          <div class="column padding-bottom-0">
+            <span class="has-text-weight-bold">Repository state:</span> {{ remoteRepositoryState }}
+          </div>
+        </div>
+
+        <div class="columns">
+          <div class="column padding-top-0">
+            <span class="has-text-weight-bold">Repository size:</span> {{ repositorySize }}
+          </div>
+        </div>
       </div>
 
       <div>
-        <button class="button is-primary">Add repository</button>
+        <button class="button is-primary" @click="addRepository">Add repository</button>
       </div>
     </div>
     <button class="modal-close is-large" @click="close"></button>
@@ -35,12 +50,12 @@ import { remote, net, IncomingMessage, Remote } from "electron";
 import { Watch } from "vue-property-decorator";
 import { RemoteRepository } from "../../Core/RemoteRepository";
 import { RepositoryUtils } from "../../Core/RepositoryUtils";
+import RepositoryManager from "../../Core/RepositoryManager";
 
 @Component
 export default class AddRepositoryModal extends Vue {
   private repositoryUrl = "";
   private destinationFolder = "";
-  private foundRepository = false;
   private repositorySize = "";
   private remoteRepository: RemoteRepository | null = null;
   private debounceTimeout: NodeJS.Timeout | null = null;
@@ -65,6 +80,21 @@ export default class AddRepositoryModal extends Vue {
     this.debounceTimeout = setTimeout(this.getRepositoryInformation.bind(this), 500);
   }
 
+  private addRepository() {
+    if (this.remoteRepository) {
+      RepositoryManager.createFromRemoteRepository(this.remoteRepository, [this.repositoryUrl], this.destinationFolder);
+      this.$emit("repositoryAdded");
+    }
+  }
+
+  private get remoteRepositoryName() {
+    return this.remoteRepository ? this.remoteRepository.name : "";
+  }
+
+  private get remoteRepositoryState() {
+    return this.remoteRepository ? this.remoteRepository.state : "";
+  }
+
   private async getRepositoryInformation() {
     this.debounceTimeout = null;
     this.isLoading = true;
@@ -74,7 +104,6 @@ export default class AddRepositoryModal extends Vue {
       .then(response => {
         this.remoteRepository = response.data as RemoteRepository;
         RepositoryUtils.calculateRepositorySize(this.remoteRepository).then(size => {
-          this.foundRepository = true;
           this.repositorySize = RepositoryUtils.sizeToHumanReadableString(size);
         });
       })
