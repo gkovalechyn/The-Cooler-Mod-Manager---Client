@@ -10,7 +10,7 @@ export class VerifyRepositoryTask extends Task<void> {
     super();
   }
 
-  public async run(notify: NotifyCallback) {
+  public async run() {
     this.localRepository.state = RepositoryState.VERIFYING;
     const remoteRepository = RemoteRepository.fromPlain(Axios.get(this.localRepository.remoteUrls[0]));
 

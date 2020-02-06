@@ -87,17 +87,17 @@ class RepositoryManager {
         case RepositoryState.READY:
           // If the repository is ready, we'll need to check with the server
           // to make sure the server repository hasn't changed
-          new VerifyRepositoryTask(repository).run(() => {});
+          new VerifyRepositoryTask(repository).run();
           break;
 
         case RepositoryState.PENDING_SCAN:
-          new ScanRepositoryTask(repository)
-            .run(() => {})
-            .then(() => {
-              new VerifyRepositoryTask(repository).run(() => {});
-            });
-          break;
         case RepositoryState.SCANNING:
+          new ScanRepositoryTask(repository)
+            .run()
+            .then(() => new VerifyRepositoryTask(repository).run())
+            .then(() => {
+              this.saveRepositories();
+            });
           break;
         case RepositoryState.UPDATES_PENDING:
           break;

@@ -10,26 +10,25 @@ import { NotifyCallback } from "./NotifyCallback";
 export class ScanRepositoryTask extends Task<void> {
   private readonly readDirAsync = promisify(readdir);
   private readonly statAsync = promisify(stat);
-
-  public constructor(private readonly repository: LocalRepository) {
+  public constructor(private readonly repository: LocalRepository, private readonly notify: NotifyCallback = () => {}) {
     super();
   }
 
-  public async run(notify: NotifyCallback) {
-    const rootPath = this.repository.path + "/files";
+  public async run() {
     this.repository.state = RepositoryState.SCANNING;
 
-    await this.scanFolder(rootPath, "");
+    await this.scanFolder(this.repository.filesPath, "");
   }
 
   private async scanFolder(folder: string, relativePath: string) {
     const entries = await this.readDirAsync(folder, { withFileTypes: true });
 
     for (const entry of entries) {
+      this.notify(`Scanning entry: ${entry.name}`);
       const entryPath = folder + "/" + entry.name;
 
       if (entry.isDirectory()) {
-        this.scanFolder(entryPath, `${relativePath}/${entry.name}`);
+        await this.scanFolder(entryPath, `${relativePath}/${entry.name}`);
       } else {
         const item = new FileInfo();
         item.name = entry.name;
