@@ -6,6 +6,7 @@ import { FileInfo } from "../FileInfo";
 import { RepositoryState } from "../RepositoryState";
 import { Task } from "./Task";
 import { NotifyCallback } from "./NotifyCallback";
+import { RepositoryUtils } from "../RepositoryUtils";
 
 export class ScanRepositoryTask extends Task<void> {
   private readonly readDirAsync = promisify(readdir);
@@ -16,7 +17,7 @@ export class ScanRepositoryTask extends Task<void> {
 
   public async run() {
     this.repository.state = RepositoryState.SCANNING;
-
+    this.repository.items = {};
     await this.scanFolder(this.repository.filesPath, "");
   }
 
@@ -32,7 +33,7 @@ export class ScanRepositoryTask extends Task<void> {
       } else {
         const item = new FileInfo();
         item.name = entry.name;
-        item.hash = await this.calculateMD5(entryPath);
+        item.hash = await RepositoryUtils.calculateFileMD5(entryPath);
         item.size = (await this.statAsync(entryPath)).size;
 
         // Remove the leading "/"
@@ -40,22 +41,5 @@ export class ScanRepositoryTask extends Task<void> {
         this.repository.items[pathToSave] = item;
       }
     }
-  }
-
-  private async calculateMD5(path: string): Promise<string> {
-    const md5 = createHash("md5");
-    md5.setEncoding("hex");
-
-    const promise = new Promise((resolve, reject) => {
-      const fileStream = createReadStream(path);
-      fileStream.pipe(md5);
-      fileStream.on("end", () => {
-        resolve(md5.read());
-      });
-
-      fileStream.on("error", reject);
-    });
-
-    return (await promise) as string;
   }
 }

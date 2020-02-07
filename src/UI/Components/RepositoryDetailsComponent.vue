@@ -34,6 +34,7 @@
       </template>
     </button>
     <div v-if="isRechecking">{{ lastMessage }}</div>
+    <DownloadRepositoryModal ref="downloadRepositoryModal" :localRepository="repository"></DownloadRepositoryModal>
   </div>
 </template>
 
@@ -47,11 +48,13 @@ import ModListComponent from "./ModListComponent.vue";
 import { ScanRepositoryTask } from "../../Core/Task/ScanRepositoryTask";
 import { VerifyRepositoryTask } from "../../Core/Task/VerifyRepositoryTask";
 import RepositoryManager from "../../Core/RepositoryManager";
+import DownloadRepositoryModal from "./DownloadRepositoryModal.vue";
 
 @Component({
   components: {
     RepositoryUrlsComponent,
-    ModListComponent
+    ModListComponent,
+    DownloadRepositoryModal
   }
 })
 export default class RepositoryDetailsComponent extends Vue {
@@ -74,7 +77,11 @@ export default class RepositoryDetailsComponent extends Vue {
   }
 
   private onDownloadUpdatesClicked() {
-    this.$emit("updateDownloadRequested");
+    this.downloadRepositoryModal.open();
+  }
+
+  private get downloadRepositoryModal() {
+    return this.$refs.downloadRepositoryModal as DownloadRepositoryModal;
   }
 
   private onMessage(message: any) {

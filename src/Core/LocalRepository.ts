@@ -14,6 +14,21 @@ export class LocalRepository extends RemoteRepository {
     return this.path + "/files";
   }
 
+  public getPrimaryUrlForFile(path: string) {
+    let primaryURL = this.remoteUrls[0];
+    if (primaryURL.includes("?")) {
+      primaryURL = primaryURL.substring(0, primaryURL.indexOf("?"));
+    }
+
+    const safePath = encodeURI(path.split("/").join(";"));
+
+    if (!primaryURL.endsWith("/")) {
+      primaryURL += "/";
+    }
+
+    return primaryURL + "file/" + safePath;
+  }
+
   public static fromPlain(plainObject: any) {
     // Build off of the remote version so we don't have to
     // duplicate everything
@@ -29,5 +44,9 @@ export class LocalRepository extends RemoteRepository {
     local.enabledMods = plainObject.enabledMods;
 
     return local;
+  }
+
+  public deleteItem(path: string) {
+    delete this.items[path];
   }
 }

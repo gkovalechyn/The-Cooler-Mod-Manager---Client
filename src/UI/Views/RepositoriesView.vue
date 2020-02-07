@@ -24,10 +24,6 @@
       </div>
     </div>
     <AddRepositoryModal ref="addRepositoryModal" @repositoryAdded="onRepositoryadded"></AddRepositoryModal>
-    <DownloadRepositoryModal
-      ref="downloadRepositoryModal"
-      :localRepository="selectedRepository"
-    ></DownloadRepositoryModal>
   </div>
 </template>
 
@@ -45,15 +41,13 @@ import { RepositoryState } from "../../Core/RepositoryState";
 import RepositoryDetailsComponent from "../Components/RepositoryDetailsComponent.vue";
 import AddRepositoryModal from "../Components/AddRepositoryModal.vue";
 import RepositoryManager from "@/Core/RepositoryManager";
-import DownloadRepositoryModal from "../Components/DownloadRepositoryModal.vue";
 
 @Component({
   components: {
     AppHeader,
     RepositoryComponent,
     RepositoryDetailsComponent,
-    AddRepositoryModal,
-    DownloadRepositoryModal
+    AddRepositoryModal
   }
 })
 export default class RepositoriesView extends Vue {
@@ -69,11 +63,6 @@ export default class RepositoriesView extends Vue {
     this.updateRepositories();
   }
 
-  private onDownloadUpdatesClicked() {
-    console.log("Open download");
-    this.downloadRepositoryModal.open();
-  }
-
   private updateRepositories() {
     this.repositories = RepositoryManager.LocalRepositories;
   }
@@ -84,10 +73,6 @@ export default class RepositoriesView extends Vue {
 
   private onAddRepositoryClicked() {
     this.addRepositoryModal.open();
-  }
-
-  private get downloadRepositoryModal() {
-    return this.$refs.downloadRepositoryModal as DownloadRepositoryModal;
   }
 }
 </script>

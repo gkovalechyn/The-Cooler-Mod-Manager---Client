@@ -25,6 +25,9 @@ export class ComputeChangesTask extends Task<Change[]> {
         const localItem = this.local.items[relativePath];
 
         if (localItem.hash != remoteItem.hash) {
+          console.log(relativePath);
+          console.log(`Local hash: ${localItem.hash}, remote hash: ${remoteItem.hash}`);
+          console.log(`Local size: ${localItem.size}, remote size: ${remoteItem.size}`);
           this.changes.push(new Change(relativePath, ItemState.PENDING_UPDATE, remoteItem.size));
         }
       }
