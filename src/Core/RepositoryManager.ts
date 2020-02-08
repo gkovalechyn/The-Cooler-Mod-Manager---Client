@@ -1,8 +1,8 @@
 import { LocalRepository } from "./LocalRepository";
-import { readFile, existsSync, writeFile, mkdirSync } from "fs";
+import { readFile, existsSync, writeFile, mkdirSync, readFileSync } from "fs";
 import { promisify } from "util";
 import { RepositoryDetails } from "./RepositoryDetails";
-import { remote } from "electron";
+import { remote, EventEmitter } from "electron";
 import { serialize } from "class-transformer";
 import { RepositoryState } from "./RepositoryState";
 import { VerifyRepositoryTask } from "./Task/VerifyRepositoryTask";
@@ -12,7 +12,8 @@ class RepositoryManager {
   private localRepositories: LocalRepository[] = [];
 
   public constructor() {
-    this.loadRepositories().then(this.verifyRepositories.bind(this));
+    this.loadRepositories();
+    this.verifyRepositories();
   }
 
   public get LocalRepositories() {
@@ -52,15 +53,15 @@ class RepositoryManager {
     return Promise.all(promises);
   }
 
-  public async loadRepositories() {
+  public loadRepositories() {
     const path = remote.app.getAppPath() + "/repositories.json";
-    const readFileAsync = promisify(readFile);
 
     if (existsSync(path)) {
-      const repositoryList = JSON.parse(await readFileAsync(path, { encoding: "utf8" })) as RepositoryDetails[];
+      const fileContents = readFileSync(path, { encoding: "utf8" });
+      const repositoryList = JSON.parse(fileContents) as RepositoryDetails[];
 
       for (const detail of repositoryList) {
-        const repository = await this.loadSingleRepository(detail);
+        const repository = this.loadSingleRepository(detail);
 
         if (repository) {
           this.localRepositories.push(repository);
@@ -69,19 +70,18 @@ class RepositoryManager {
     }
   }
 
-  private async loadSingleRepository(details: RepositoryDetails) {
+  private loadSingleRepository(details: RepositoryDetails) {
     const filePath = details.path + "/repository.json";
-    const readFileAsync = promisify(readFile);
 
     if (existsSync(filePath)) {
-      const jsonBlob = JSON.parse(await readFileAsync(filePath, { encoding: "utf8" }));
+      const jsonBlob = JSON.parse(readFileSync(filePath, { encoding: "utf8" }));
       return LocalRepository.fromPlain(jsonBlob);
     }
 
     return null;
   }
 
-  private async verifyRepositories() {
+  public verifyRepositories() {
     for (const repository of this.localRepositories) {
       switch (repository.state) {
         case RepositoryState.READY:

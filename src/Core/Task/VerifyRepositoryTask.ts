@@ -16,7 +16,7 @@ export class VerifyRepositoryTask extends Task<void> {
     const remoteRepository = RemoteRepository.fromPlain((await Axios.get(this.localRepository.remoteUrls[0])).data);
 
     if (this.localRepository.version != remoteRepository.version) {
-      console.log(`Local: ${this.localRepository.version}, remote: ${remoteRepository.version}`);
+      // console.log(`Local: ${this.localRepository.version}, remote: ${remoteRepository.version}`);
       this.localRepository.state = RepositoryState.UPDATES_PENDING;
       return;
     }

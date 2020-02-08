@@ -55,6 +55,15 @@ export default class RepositoriesView extends Vue {
   private selectedRepository: LocalRepository | null = null;
 
   public created() {
+    /*
+    RepositoryManager.loadRepositories()
+      .then(() => {
+        RepositoryManager.verifyRepositories();
+      })
+      .then(() => {
+        this.updateRepositories();
+      });
+      */
     this.updateRepositories();
   }
 

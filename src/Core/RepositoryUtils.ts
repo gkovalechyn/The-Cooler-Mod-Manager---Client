@@ -1,7 +1,7 @@
 import { RemoteRepository } from "./RemoteRepository";
 import { FileInfo } from "./FileInfo";
 import { createHash } from "crypto";
-import { createReadStream } from "original-fs";
+import { createReadStream } from "fs";
 
 export class RepositoryUtils {
   public static async calculateRepositorySize(repository: RemoteRepository) {
@@ -30,16 +30,40 @@ export class RepositoryUtils {
     const md5 = createHash("md5");
     md5.setEncoding("hex");
 
-    const promise = new Promise((resolve, reject) => {
-      const fileStream = createReadStream(path);
-      fileStream.pipe(md5);
-      fileStream.on("end", () => {
+    console.log("Creating promise");
+    const promise = new Promise<string>((resolve, reject) => {
+      const fileStream = createReadStream(path, {
+        autoClose: true,
+        emitClose: true
+      });
+
+      fileStream.on("open", () => console.log("STREAM OPEN"));
+      fileStream.on("ready", () => console.log("STREAM READY"));
+      fileStream.on("close", () => {
+        console.log("Stream closed");
         resolve(md5.read());
       });
 
-      fileStream.on("error", reject);
-    });
+      fileStream.on("data", data => {
+        console.log(data);
+      });
 
-    return (await promise) as string;
+      fileStream.on("end", () => {
+        console.log("Stream ENDED");
+        resolve(md5.read());
+      });
+
+      fileStream.on("error", error => {
+        console.error(error);
+        reject(error);
+      });
+
+      console.log("Piping to MD5");
+      // fileStream.pipe(md5, { end: true });
+      // fileStream.resume();
+      console.log("Is paused?: " + fileStream.isPaused());
+    });
+    console.log("Returning promise");
+    return promise;
   }
 }
