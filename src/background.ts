@@ -1,7 +1,12 @@
 "use strict";
 
-import { app, protocol, BrowserWindow } from "electron";
+import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol, installVueDevtools } from "vue-cli-plugin-electron-builder/lib";
+import { DownloadRequest } from "./Core/DownloadRequest";
+import axios from "axios";
+import { createWriteStream, ReadStream } from "fs";
+import { DownloadUpdate } from "./Core/DownloadUpdate";
+import { DownloadDone } from "./Core/DownloadDone";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -16,6 +21,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: true,
     webPreferences: {
       nodeIntegration: true
     }
@@ -27,6 +33,7 @@ function createWindow() {
     if (!process.env.IS_TEST) win.webContents.openDevTools();
   } else {
     createProtocol("app");
+    win.removeMenu();
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
   }
@@ -87,3 +94,35 @@ if (isDevelopment) {
     });
   }
 }
+
+ipcMain.on("download-request", (event, message: DownloadRequest) => {
+  const writeStream = createWriteStream(message.path, {
+    flags: "a",
+    autoClose: true
+  });
+  let bytesDownloaded = 0;
+
+  axios
+    .get(message.url, {
+      responseType: "stream"
+    })
+    .then(response => {
+      const responseStream = response.data as ReadStream;
+      responseStream.pipe(writeStream);
+
+      responseStream.on("data", data => {
+        bytesDownloaded += Buffer.byteLength(data);
+        win!.webContents.send("download-update", {
+          bytesDownloaded,
+          path: message.path
+        } as DownloadUpdate);
+      });
+
+      responseStream.on("close", () => {
+        writeStream.close();
+        win!.webContents.send("download-done", {
+          path: message.path
+        } as DownloadDone);
+      });
+    });
+});
